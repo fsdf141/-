@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>猜數字遊戲 💕</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(135deg, #ffe6f0 0%, #ffd1e8 50%, #ffb6c1 100%);
+      font-family: "Segoe UI", "Microsoft JhengHei", sans-serif;
+      padding: 20px;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 30px;
+      padding: 40px 35px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 15px 40px rgba(255, 105, 180, 0.25);
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .game-card::before {
+      content: "🌸";
+      position: absolute;
+      top: 15px;
+      left: 20px;
+      font-size: 24px;
+      opacity: 0.6;
+    }
+
+    .game-card::after {
+      content: "💖";
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 24px;
+      opacity: 0.6;
+    }
+
+    h1 {
+      color: #ff69b4;
+      font-size: 1.9rem;
+      margin-bottom: 8px;
+      text-shadow: 1px 1px 0 #ffc0cb;
+    }
+
+    .subtitle {
+      color: #ff85a2;
+      font-size: 0.95rem;
+      margin-bottom: 25px;
+    }
+
+    .attempts {
+      background: #fff0f5;
+      color: #ff69b4;
+      padding: 8px 18px;
+      border-radius: 50px;
+      display: inline-block;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+      font-weight: 600;
+    }
+
+    .input-area {
+      margin: 20px 0;
+    }
+
+    input[type="number"] {
+      width: 140px;
+      padding: 12px 15px;
+      font-size: 1.3rem;
+      border: 3px solid #ffb6c1;
+      border-radius: 20px;
+      text-align: center;
+      outline: none;
+      color: #ff69b4;
+      background: #fff5f8;
+      transition: all 0.2s;
+    }
+
+    input[type="number"]:focus {
+      border-color: #ff69b4;
+      box-shadow: 0 0 0 4px rgba(255, 105, 180, 0.2);
+    }
+
+    /* 隱藏數字輸入框的上下箭頭 */
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      margin-top: 15px;
+    }
+
+    button {
+      padding: 12px 28px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+
+    .btn-guess {
+      background: linear-gradient(135deg, #ff69b4, #ff85a2);
+      color: white;
+      box-shadow: 0 6px 15px rgba(255, 105, 180, 0.4);
+    }
+
+    .btn-guess:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(255, 105, 180, 0.5);
+    }
+
+    .btn-guess:active {
+      transform: translateY(0);
+    }
+
+    .btn-restart {
+      background: #fff0f5;
+      color: #ff69b4;
+      border: 2px solid #ffb6c1;
+    }
+
+    .btn-restart:hover {
+      background: #ffe4ec;
+    }
+
+    .message {
+      margin-top: 25px;
+      min-height: 50px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      padding: 12px 15px;
+      border-radius: 15px;
+      transition: all 0.3s;
+    }
+
+    .msg-normal {
+      color: #ff69b4;
+      background: #fff0f5;
+    }
+
+    .msg-success {
+      color: #fff;
+      background: linear-gradient(135deg, #ff69b4, #ff1493);
+      animation: bounce 0.5s ease;
+    }
+
+    .msg-fail {
+      color: #c71585;
+      background: #ffe4ec;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+
+    .hint {
+      margin-top: 12px;
+      font-size: 0.85rem;
+      color: #ff85a2;
+    }
+
+    .footer {
+      margin-top: 25px;
+      font-size: 0.8rem;
+      color: #ffb6c1;
+    }
+  </style>
+</head>
+<body>
+  <div class="game-card">
+    <h1>猜數字遊戲 🎀</h1>
+    <p class="subtitle">請輸入 1～100 任意數字開始</p>
+    
+    <div class="attempts" id="attempts">剩餘次數：5</div>
+    
+    <div class="input-area">
+      <input type="number" id="guessInput" min="1" max="100" placeholder="1~100" autofocus>
+      <div class="btn-group">
+        <button class="btn-guess" id="guessBtn" onclick="makeGuess()">猜！</button>
+        <button class="btn-restart" onclick="restartGame()">再玩一次</button>
+      </div>
+    </div>
+    
+    <div class="message msg-normal" id="message">加油喔～ 你一定可以的！💕</div>
+    <p class="hint">最多可以猜 5 次喔</p>
+    
+    <div class="footer">Made with 💖 for you</div>
+  </div>
+
+  <script>
+    let secretNumber;
+    let attemptsLeft;
+    let gameOver;
+
+    function initGame() {
+      secretNumber = Math.floor(Math.random() * 100) + 1; // 1~100
+      attemptsLeft = 5;
+      gameOver = false;
+      
+      document.getElementById('attempts').textContent = `剩餘次數：${attemptsLeft}`;
+      document.getElementById('message').textContent = '加油喔～ 你一定可以的！💕';
+      document.getElementById('message').className = 'message msg-normal';
+      document.getElementById('guessInput').value = '';
+      document.getElementById('guessInput').disabled = false;
+      document.getElementById('guessBtn').disabled = false;
+      document.getElementById('guessInput').focus();
+    }
+
+    function makeGuess() {
+      if (gameOver) return;
+
+      const input = document.getElementById('guessInput');
+      const num = parseInt(input.value);
+
+      if (isNaN(num) || num < 1 || num > 100) {
+        document.getElementById('message').textContent = '請輸入 1～100 的數字喔～';
+        document.getElementById('message').className = 'message msg-normal';
+        return;
+      }
+
+      attemptsLeft--;
+      document.getElementById('attempts').textContent = `剩餘次數：${attemptsLeft}`;
+
+      const msgEl = document.getElementById('message');
+
+      if (num === secretNumber) {
+        msgEl.textContent = '恭喜你猜對了 喜憨兒 🎉';
+        msgEl.className = 'message msg-success';
+        endGame();
+      } else if (num > secretNumber) {
+        msgEl.textContent = '數字太大了 小一點';
+        msgEl.className = 'message msg-normal';
+      } else {
+        msgEl.textContent = '數字太小了 大一點';
+        msgEl.className = 'message msg-normal';
+      }
+
+      if (attemptsLeft === 0 && num !== secretNumber) {
+        msgEl.textContent = '你沒有猜到 下次再來 弱智^^:D';
+        msgEl.className = 'message msg-fail';
+        endGame();
+      }
+
+      input.value = '';
+      input.focus();
+    }
+
+    function endGame() {
+      gameOver = true;
+      document.getElementById('guessInput').disabled = true;
+      document.getElementById('guessBtn').disabled = true;
+    }
+
+    function restartGame() {
+      initGame();
+    }
+
+    // 按 Enter 也能猜
+    document.getElementById('guessInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        makeGuess();
+      }
+    });
+
+    // 開始遊戲
+    initGame();
+  </script>
+</body>
+</html>
